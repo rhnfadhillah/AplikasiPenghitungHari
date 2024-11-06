@@ -3,6 +3,7 @@ import java.awt.event.*;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.Date;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -28,6 +29,14 @@ public class AplikasiPenghitungHari extends javax.swing.JFrame {
         btnHitung.addActionListener(e -> calculateDays());
         spinnerTahun.addChangeListener(e -> updateCalendar());
         comboBulan.addActionListener(e -> updateCalendar());
+        jCalendar1.addPropertyChangeListener("calendar", evt -> {
+            Date selectedDate = jCalendar1.getDate();
+            if (selectedDate != null) {
+                LocalDate localDate = selectedDate.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+                spinnerTahun.setValue(localDate.getYear());
+                comboBulan.setSelectedIndex(localDate.getMonthValue() - 1); // Month is 1-based
+            }
+        });
     }
     
     private void calculateDays() {
@@ -129,18 +138,16 @@ public class AplikasiPenghitungHari extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGap(34, 34, 34)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addGap(33, 33, 33)
                         .addComponent(labelJumlahHari, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel4)
-                            .addComponent(labelAwalAkhir))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(labelKabisat, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(3, 3, 3)))
+                    .addComponent(labelAwalAkhir)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addGap(18, 18, 18)
+                        .addComponent(labelKabisat, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(60, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
