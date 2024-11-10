@@ -16,16 +16,17 @@ Tugas 4 - Muhammad Raihan Fadhillah 2210010404
 ## Deskripsi
 Aplikasi Penghitungan Hari adalah aplikasi sederhana yang dibuat menggunakan GUI berbasis Java. Aplikasi ini dirancang untuk membantu pengguna menghitung jumlah hari dalam satu bulan dan tahun tertentu. Selain itu, aplikasi ini juga memberikan informasi mengenai hari pertama dan hari terakhir dalam bulan yang dipilih, serta menentukan apakah tahun tersebut adalah tahun kabisat.
 
+## Prerequisites
+- JDK versi 8 atau lebih baru.
+- IDE seperti IntelliJ IDEA, Eclipse, atau NetBeans untuk menjalankan dan mengembangkan aplikasi.
+- Library JCalendar
+
 ## Fitur
 1. Menghitung jumlah hari dalam bulan yang dipilih.
 2. Menentukan apakah tahun yang dipilih adalah tahun kabisat.
 3. Menampilkan nama hari pertama dan hari terakhir dari bulan yang dipilih.
 4. Menghitung dan menampilkan selisih hari antara dua tanggal yang dipilih.
 
-## Prerequisites
-- JDK versi 8 atau lebih baru.
-- IDE seperti IntelliJ IDEA, Eclipse, atau NetBeans untuk menjalankan dan mengembangkan aplikasi.
-- Library JCalendar
 
 ## Cara Menjalankan
 1. Clone atau Download Repository:
