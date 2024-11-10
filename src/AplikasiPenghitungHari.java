@@ -48,7 +48,7 @@ public class AplikasiPenghitungHari extends javax.swing.JFrame {
         comboBulan.addActionListener(e -> updateCalendar());
         jCalendar1.addPropertyChangeListener("calendar", evt -> {
             if (!isUpdating) {
-                updateSpinnerAndComboBoxFromCalendar(); // Update spinner and combo box from calendar
+                updateSpinnerAndComboBoxFromCalendar(); // Update spinner and combo box dari calendar
             }
         });
     }
