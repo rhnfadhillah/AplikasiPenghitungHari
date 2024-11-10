@@ -3,239 +3,185 @@
 
 Tugas 4 - Muhammad Raihan Fadhillah 2210010404
 
+## Daftar Isi
+- [Deskripsi](#deskripsi)
+- [Prerequisites](#prerequisites)
+- [Fitur](#fitur)
+- [Cara Menjalankan](#cara-menjalankan)
+- [Dokumentasi](#dokumentasi)
+- [Screenshots](#screenshots)
+- [Contoh Penggunaan](#contoh-penggunaan)
+- [Pembuat](#pembuat)
+
+## Deskripsi
 Aplikasi Penghitungan Hari adalah aplikasi sederhana yang dibuat menggunakan GUI berbasis Java. Aplikasi ini dirancang untuk membantu pengguna menghitung jumlah hari dalam satu bulan dan tahun tertentu. Selain itu, aplikasi ini juga memberikan informasi mengenai hari pertama dan hari terakhir dalam bulan yang dipilih, serta menentukan apakah tahun tersebut adalah tahun kabisat.
 
 ## Fitur
-    1. Pengecekkan berapa jumlah hari dalam bulan dan tahun yang di masukkan pengguna.
-    2. Melakukan perhitungan selisih hari antara dua tanggal berdasarkan inputan pengguna.
-    3. Mengetahui kapan hari pertama dan hari terakhir pada bulan dan tahun yang di input pengguna.
-    4. Mengetahui apakah tahun yang di input pengguna merupakan tahun kabisat atau bukan.
+1. Menghitung jumlah hari dalam bulan yang dipilih.
+2. Menentukan apakah tahun yang dipilih adalah tahun kabisat.
+3. Menampilkan nama hari pertama dan hari terakhir dari bulan yang dipilih.
+4. Menghitung dan menampilkan selisih hari antara dua tanggal yang dipilih.
+
+## Prerequisites
+- JDK versi 8 atau lebih baru.
+- IDE seperti IntelliJ IDEA, Eclipse, atau NetBeans untuk menjalankan dan mengembangkan aplikasi.
+- Library JCalendar
+
+## Cara Menjalankan
+1. Clone atau Download Repository:
+    - Clone repository ini atau download sebagai ZIP dan ekstrak.
+
+2. Buka Proyek di IDE:
+    - Buka IDE Anda dan import proyek Java yang telah diunduh.
+
+3. Jalankan Aplikasi:
+    - Jalankan kelas AplikasiPenghitungHari dari IDE Anda.
+
 ## Dokumentasi
-## PenghitungUmurForm.java
-- Method tombol hitung (form)
-```java
-private void btnHitungActionPerformed(java.awt.event.ActionEvent evt) { 
-    Date tanggalLahir = dateChooserTanggalLahir.getDate();
-    if (tanggalLahir != null) {
-        LocalDate lahir = tanggalLahir.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate sekarang = LocalDate.now();
-        String umur = helper.hitungUmurDetail(lahir, sekarang);
-        txtUmur.setText(umur);
-
-        LocalDate ulangTahunBerikutnya = helper.hariUlangTahunBerikutnya(lahir, sekarang);
-        String hariUlangTahunBerikutnya = helper.getDayOfWeekInIndonesian(ulangTahunBerikutnya);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        String tanggalUlangTahunBerikutnya = ulangTahunBerikutnya.format(formatter);
+- Method konstruktor
+``` java
+  public AplikasiPenghitungHari() {
+        initComponents();
+        setupListeners();
+        // Gunakan variabel kontrol agar perubahan awal tidak memicu listener
+        isUpdating = true;
         
-        txtHariUlangTahunBerikutnya.setText(hariUlangTahunBerikutnya + " (" + tanggalUlangTahunBerikutnya + ")");
+        // Set tanggalAwalCalendar ke tanggal saat ini
+        jCalendar1.setDate(new Date());
         
-        stopFetching = true;
-        if (peristiwaThread != null && peristiwaThread.isAlive()) {
-            peristiwaThread.interrupt(); // Beri sinyal ke thread untuk berhenti
-        }
-        stopFetching = false;
+        // Ambil tanggal saat ini
+        LocalDate currentDate = LocalDate.now();
 
-        // Mendapatkan peristiwa penting secara asinkron
-        peristiwaThread = new Thread(() -> {
-            try {
-                txtAreaPeristiwa.setText("Tunggu, sedang mengambil data...\n");
-                helper.getPeristiwaBarisPerBaris(ulangTahunBerikutnya, txtAreaPeristiwa, () -> stopFetching);
-                if (!stopFetching) {
-                    javax.swing.SwingUtilities.invokeLater(() -> txtAreaPeristiwa.append("Selesai mengambil data peristiwa"));
-                }
-            } catch (Exception e) {
-                if (Thread.currentThread().isInterrupted()) {
-                    javax.swing.SwingUtilities.invokeLater(() -> txtAreaPeristiwa.setText("Pengambilan data dibatalkan.\n"));
-                }
+        // Sinkronkan tahunSpinner dan bulanComboBox dengan tanggal saat ini
+        spinnerTahun.setValue(currentDate.getYear());
+        comboBulan.setSelectedIndex(currentDate.getMonthValue() - 1);
+
+        // Nonaktifkan variabel kontrol setelah inisialisasi
+        isUpdating = false;
+    }
+```
+
+- Method setup listener
+``` java
+private void setupListeners() {
+        btnHitung.addActionListener(e -> calculateDays());
+        spinnerTahun.addChangeListener(e -> updateCalendar());
+        comboBulan.addActionListener(e -> updateCalendar());
+        jCalendar1.addPropertyChangeListener("calendar", evt -> {
+            if (!isUpdating) {
+                updateSpinnerAndComboBoxFromCalendar(); // Update spinner and combo box dari calendar
             }
         });
-        peristiwaThread.start();
     }
-}
-
-``` 
-- Method saat date chooser berubah (form)
-
-```java
-private void dateChooserTanggalLahirPropertyChange(java.beans.PropertyChangeEvent evt) {                                                
-        txtUmur.setText("");
-        txtHariUlangTahunBerikutnya.setText("");
-        stopFetching = true;
-        if (peristiwaThread != null && peristiwaThread.isAlive()) {
-            peristiwaThread.interrupt();
-        }
-        txtAreaPeristiwa.setText("");
-    }     
 ```
 
-- Method tombol keluar
+- Method mencari selisih
 ``` java
-System.exit(0);
+ private void calculateTwoDate(){
+        LocalDate tanggalAwal = jCalendar1.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+        LocalDate tanggalAkhir = jCalendar2.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+
+        // Hitung selisih hari
+        long selisihHari = ChronoUnit.DAYS.between(tanggalAwal, tanggalAkhir);
+
+        // Perbarui label selisih hari
+        labelSelisih.setText("Selisih Dua Tanggal: " + selisihHari + " hari");
+    }
 ```
 
-## PenghitungUmurHelper.java
-
-- Method penghitungan umur secara detail (kelas helper)
+- Method update jSpinner dan jComboBox
 ``` java
- public String hitungUmurDetail(LocalDate lahir, LocalDate sekarang){
-       Period period = Period.between(lahir, sekarang);
-       return period.getYears() + " tahun, " + period.getMonths() + " bulan, " + period.getDays() + " hari";
+ private void updateSpinnerAndComboBoxFromCalendar() {
+        if (isUpdating) return; // if updating exit the method
+        isUpdating = true;
+
+        // getting date from jCalendar
+        LocalDate selectedDate = jCalendar1.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+
+        // set month and years based on jcalendar
+        comboBulan.setSelectedIndex(selectedDate.getMonthValue() - 1); // index start from 0
+        spinnerTahun.setValue(selectedDate.getYear()); // set year to spinner
+
+        // updating using method
+        calculateDays();
+
+        isUpdating = false;
     }
 ```
 
-- Method perhitungan ulang tahun berikutnya (kelas helper)
-```java
- public LocalDate hariUlangTahunBerikutnya (LocalDate lahir, LocalDate sekarang) {
-        LocalDate ulangTahunBerikutnya = lahir.withYear(sekarang.getYear());
-        if (!ulangTahunBerikutnya.isAfter(sekarang)) {
-            ulangTahunBerikutnya = ulangTahunBerikutnya.plusYears(1);
-        } return ulangTahunBerikutnya;
-    }
-```
-
-- Method untuk mengambil nama hari dalam Bahasa Indonesia (kelas helper)
+- Method hitung berapa jumlah hari, penentuan hari awal dan akhir, dan tahun kabisat
 ``` java
-public String getDayOfWeekInIndonesian (LocalDate date){
-        switch (date.getDayOfWeek()){
-            case MONDAY :
-                return "Senin";
-            case TUESDAY :
-                return "Selasa";
-            case WEDNESDAY :
-                return "Rabu";
-            case THURSDAY :
-                return "Kamis";
-            case FRIDAY :
-                return "Jum'at";
-            case SATURDAY :
-                return "Sabtu";
-            case SUNDAY :
-                return "Minggu";
-            default :
-                return "";
+private void calculateDays() {
+        int year = (Integer) spinnerTahun.getValue();
+        int monthIndex = comboBulan.getSelectedIndex(); // 0 = January, 11 = December
+        Month month = Month.of(monthIndex + 1); // Month is 1-based
+        // Get number of days in the month
+        int daysInMonth = month.length(LocalDate.of(year, month, 1).isLeapYear());
+        labelJumlahHari.setText(String.valueOf(daysInMonth));
+        // Check if it's a leap year
+        if (LocalDate.of(year, month, 1).isLeapYear()) {
+            labelKabisat.setText("Ya");
+        } else {
+            labelKabisat.setText("Tidak");
         }
+        LocalDate firstDay = LocalDate.of(year, month, 1);
+        LocalDate lastDay = LocalDate.of(year, month, daysInMonth);
+
+
+        // Get the names of the first and last days
+        String firstDayName = getDayName(firstDay.getDayOfWeek());
+        String lastDayName = getDayName(lastDay.getDayOfWeek());
+        labelAwalAkhir.setText("Hari Pertama: " + firstDayName + ", Hari Terakhir: " + lastDayName);
+
+    }
 ```
 
-- Method untuk menampilkan peristiwa per baris (kelas helper)
+- Method update calendar
 ``` java
- public void getPeristiwaBarisPerBaris(LocalDate tanggal, JTextArea txtAreaPeristiwa, Supplier<Boolean> shouldStop) {
-        try {
-                if (shouldStop.get()) {
-                    return;
-                }
-            String urlString = "https://byabbe.se/on-this-day/" +
-            tanggal.getMonthValue() + "/" + tanggal.getDayOfMonth() + "/events.json";
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection)
-            url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0");
-            int responseCode = conn.getResponseCode();
-            if (responseCode != 200) {
-            throw new Exception("HTTP response code: " + responseCode +
-            ". Silakan coba lagi nanti atau cek koneksi internet.");
-        }
-        BufferedReader in = new BufferedReader(new
-        InputStreamReader(conn.getInputStream()));
-        String inputLine;
-        StringBuilder content = new StringBuilder();
-        while ((inputLine = in.readLine()) != null) {
-            if (shouldStop.get()) {
-                in.close();
-                conn.disconnect();
-                javax.swing.SwingUtilities.invokeLater(() -> txtAreaPeristiwa.setText("Pengambilan data dibatalkan.\n"));
-                return;
-            }
-            content.append(inputLine);
-        }
-        in.close();
-        conn.disconnect();
-        JSONObject json = new JSONObject(content.toString());
-        JSONArray events = json.getJSONArray("events");
-        for (int i = 0; i < events.length(); i++) {
-            if (shouldStop.get()) {
-                javax.swing.SwingUtilities.invokeLater(() -> txtAreaPeristiwa.setText("Pengambilan data dibatalkan.\n"));
-                return;
-            }
-        JSONObject event = events.getJSONObject(i);
-        String year = event.getString("year");
-        String description = event.getString("description");
-        String translatedDescription = translateToIndonesian(description);
-        String peristiwa = year + ": " + translatedDescription;
-        javax.swing.SwingUtilities.invokeLater(() -> txtAreaPeristiwa.append(peristiwa + "\n"));
-        }
-        if (events.length() == 0) {
-            javax.swing.SwingUtilities.invokeLater(() -> txtAreaPeristiwa.setText("Tidak ada peristiwa penting yang ditemukan pada tanggal ini."));
-        }
-        } catch (Exception e) {
-            javax.swing.SwingUtilities.invokeLater(() -> txtAreaPeristiwa.setText("Gagal mendapatkan data peristiwa: " + e.getMessage()));
-        }
+private void updateCalendar() {
+
+        if (isUpdating) return; // if updating exit this method
+        isUpdating = true;
+
+        int bulan = comboBulan.getSelectedIndex(); // index start from 0
+        int tahun = (int) spinnerTahun.getValue(); // get years
+
+        // set jcalendar based on combo box and spinner
+        LocalDate tanggalBaru = LocalDate.of(tahun, bulan + 1, 1); // +1 because index
+        Date tanggal = Date.from(tanggalBaru.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant());
+        jCalendar1.setDate(tanggal);
+
+        isUpdating = false;
     }
 ```
 
-- Method terjemah peristiwa penting ke bahasa Indonesia
-```java
- public void getPeristiwaBarisPerBaris(LocalDate tanggal, JTextArea txtAreaPeristiwa, Supplier<Boolean> shouldStop) {
-        try {
-                if (shouldStop.get()) {
-                    return;
-                }
-            String urlString = "https://byabbe.se/on-this-day/" +
-            tanggal.getMonthValue() + "/" + tanggal.getDayOfMonth() + "/events.json";
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection)
-            url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0");
-            int responseCode = conn.getResponseCode();
-            if (responseCode != 200) {
-            throw new Exception("HTTP response code: " + responseCode +
-            ". Silakan coba lagi nanti atau cek koneksi internet.");
+- Method ubah nama hari ke Bahasa Indonesia
+``` java
+ private String getDayName(DayOfWeek dayOfWeek) {
+        switch (dayOfWeek) {
+            case MONDAY: return "Senin";
+            case TUESDAY: return "Selasa";
+            case WEDNESDAY: return "Rabu";
+            case THURSDAY: return "Kamis";
+            case FRIDAY: return "Jumat";
+            case SATURDAY: return "Sabtu";
+            case SUNDAY: return "Minggu";
+            default: return "";
+
         }
-        BufferedReader in = new BufferedReader(new
-        InputStreamReader(conn.getInputStream()));
-        String inputLine;
-        StringBuilder content = new StringBuilder();
-        while ((inputLine = in.readLine()) != null) {
-            if (shouldStop.get()) {
-                in.close();
-                conn.disconnect();
-                javax.swing.SwingUtilities.invokeLater(() -> txtAreaPeristiwa.setText("Pengambilan data dibatalkan.\n"));
-                return;
-            }
-            content.append(inputLine);
-        }
-        in.close();
-        conn.disconnect();
-        JSONObject json = new JSONObject(content.toString());
-        JSONArray events = json.getJSONArray("events");
-        for (int i = 0; i < events.length(); i++) {
-            if (shouldStop.get()) {
-                javax.swing.SwingUtilities.invokeLater(() -> txtAreaPeristiwa.setText("Pengambilan data dibatalkan.\n"));
-                return;
-            }
-        JSONObject event = events.getJSONObject(i);
-        String year = event.getString("year");
-        String description = event.getString("description");
-        String translatedDescription = translateToIndonesian(description);
-        String peristiwa = year + ": " + translatedDescription;
-        javax.swing.SwingUtilities.invokeLater(() -> txtAreaPeristiwa.append(peristiwa + "\n"));
-        }
-        if (events.length() == 0) {
-            javax.swing.SwingUtilities.invokeLater(() -> txtAreaPeristiwa.setText("Tidak ada peristiwa penting yang ditemukan pada tanggal ini."));
-        }
-        } catch (Exception e) {
-            javax.swing.SwingUtilities.invokeLater(() -> txtAreaPeristiwa.setText("Gagal mendapatkan data peristiwa: " + e.getMessage()));
-        }
+
     }
 ```
+## Screenshots
+![Screenshot 2024-11-10 180000](https://github.com/user-attachments/assets/94666a9b-cf57-4aa8-9903-3726b0619dad)
+
+## Contoh Penggunaan
+1. Pilih bulan dan tahun yang diinginkan pada jSpinner dan jComboBox atau JCalendar1.
+2. Pilih tanggal menggunakan JCalendar1 dan JCalendar2.
+3. Klik tombol "Hitung" untuk melihat selisih hari antara dua tanggal yang dipilih, berapa jumlah hari dalam 1 bulan dari JCalendar1, penentuan tahun kabisat berdasarkan JCalendar1 atau melalui jSpinner, dan penentuan hari awal dan hari akhir.
+
+
 ## Pembuat
 
 - Nama : Muhammad Raihan Fadhillah
 - NPM : 2210010404
-
-
-## Screenshots
-
-
-
